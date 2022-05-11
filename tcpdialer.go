@@ -156,6 +156,9 @@ type TCPDialer struct {
 	// DNSCacheDuration may be used to override the default DNS cache duration (DefaultDNSCacheDuration)
 	DNSCacheDuration time.Duration
 
+	// override DefaultDialTimeout
+	DialTimeoutOverride time.Duration
+
 	tcpAddrsMap sync.Map
 
 	concurrencyCh chan struct{}
@@ -187,7 +190,11 @@ type TCPDialer struct {
 //     * foo.bar:80
 //     * aaa.com:8080
 func (d *TCPDialer) Dial(addr string) (net.Conn, error) {
-	return d.dial(addr, false, DefaultDialTimeout)
+	timeout := DefaultDialTimeout
+	if d.DialTimeoutOverride > 0 {
+		timeout = d.DialTimeoutOverride
+	}
+	return d.dial(addr, false, timeout)
 }
 
 // DialTimeout dials the given TCP addr using tcp4 using the given timeout.
