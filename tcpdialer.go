@@ -164,6 +164,8 @@ type TCPDialer struct {
 	concurrencyCh chan struct{}
 
 	once sync.Once
+
+	DisableTCPCleanup bool
 }
 
 // Dial dials the given TCP addr using tcp4.
@@ -286,7 +288,9 @@ func (d *TCPDialer) dial(addr string, dualStack bool, timeout time.Duration) (ne
 			d.DNSCacheDuration = DefaultDNSCacheDuration
 		}
 
-		go d.tcpAddrsClean()
+		if !d.DisableTCPCleanup {
+			go d.tcpAddrsClean()
+		}
 	})
 
 	addrs, idx, err := d.getTCPAddrs(addr, dualStack)
